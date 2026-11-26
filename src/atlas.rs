@@ -1,4 +1,37 @@
 //! Atlas: build-time embedded custom client settings for this fork.
+//!
+//! The JSON payload has the same shape as a signed `custom.txt`, but it is compiled in for the
+//! variant named by the `ATLAS_VARIANT` environment variable, so it needs no signature and a
+//! `custom.txt` next to the executable cannot replace it.
+
+const DESTEK_JSON: &str = include_str!("../res/atlas/destek.json");
+const BAGLANTI_JSON: &str = include_str!("../res/atlas/baglanti.json");
+
+#[derive(Debug, PartialEq)]
+pub(crate) enum CustomClientSource {
+    Embedded(&'static str),
+    File,
+}
+
+pub(crate) fn variant_json(name: &str) -> Option<&'static str> {
+    match name {
+        "destek" => Some(DESTEK_JSON),
+        "baglanti" => Some(BAGLANTI_JSON),
+        _ => None,
+    }
+}
+
+/// The payload of the variant this binary was built for; `None` keeps stock RustDesk behavior.
+pub(crate) fn embedded_config() -> Option<&'static str> {
+    variant_json(option_env!("ATLAS_VARIANT").unwrap_or_default())
+}
+
+pub(crate) fn custom_client_source(embedded: Option<&'static str>) -> CustomClientSource {
+    match embedded {
+        Some(json) => CustomClientSource::Embedded(json),
+        None => CustomClientSource::File,
+    }
+}
 
 #[cfg(test)]
 mod tests {

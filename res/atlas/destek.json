@@ -1,0 +1,20 @@
+{
+  "app-name": "Atlas Destek",
+  "override-settings": {
+    "custom-rendezvous-server": "rustdesk.atlantik.tr",
+    "relay-server": "rustdesk.atlantik.tr",
+    "api-server": "",
+    "key": "ITPXTrZ5mbvvLRzWnGfW9KcYWgJrXKnL0eQd9TO9g0w=",
+    "approve-mode": "",
+    "verification-method": "use-temporary-password",
+    "enable-clipboard": "Y",
+    "enable-file-transfer": "Y",
+    "enable-check-update": "N",
+    "allow-auto-update": "N"
+  },
+  "conn-type": "incoming",
+  "disable-settings": "Y",
+  "disable-ab": "Y",
+  "disable-account": "Y",
+  "disable-installation": "Y"
+}

@@ -32,9 +32,12 @@ jobs:
       matrix:
         include:
           - variant: destek
-            pack_exe: rustdesk.exe
+            pack_exe: AtlasDestek.exe
+          - variant: baglanti
+            pack_exe: AtlasBaglanti.exe
     env:
       PACK_EXE: ${{ matrix.pack_exe }}
+      ATLAS_VARIANT: ${{ matrix.variant }}
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
@@ -113,6 +116,9 @@ jobs:
         run: |
           python3 .\build.py --portable --flutter --skip-portable-pack --hwcodec --vram
           mv ./flutter/build/windows/x64/runner/Release ./rustdesk
+          # The portable packer names its extraction directory after this exe, so each variant
+          # (and stock RustDesk) gets its own %LOCALAPPDATA% folder.
+          mv ./rustdesk/rustdesk.exe "./rustdesk/$env:PACK_EXE"
 
           Invoke-WebRequest -Uri https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip -OutFile usbmmidd_v2.zip
           Expand-Archive usbmmidd_v2.zip -DestinationPath .
@@ -143,6 +149,13 @@ jobs:
           popd
           mkdir -p ./out
           mv ./target/release/rustdesk-portable-packer.exe "./out/$PACK_EXE"
+
+      - name: Verify packaged executable name
+        shell: bash
+        run: |
+          test ! -e ./rustdesk/rustdesk.exe || { echo "rustdesk.exe must not be packaged"; exit 1; }
+          test -f "./rustdesk/$PACK_EXE" || { echo "missing $PACK_EXE"; exit 1; }
+          test -f "./out/$PACK_EXE" || { echo "missing out/$PACK_EXE"; exit 1; }
 
       - name: Upload executable
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

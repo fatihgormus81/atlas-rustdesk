@@ -2507,6 +2507,13 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
 }
 
 pub fn load_custom_client() {
+    // Atlas: settings compiled into this variant win; custom.txt is never read.
+    if let crate::atlas::CustomClientSource::Embedded(json) =
+        crate::atlas::custom_client_source(crate::atlas::embedded_config())
+    {
+        apply_custom_client_json(json.as_bytes());
+        return;
+    }
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());
@@ -2618,8 +2625,13 @@ pub fn read_custom_client(config: &str) {
         log::error!("Failed to dec custom client config");
         return;
     };
+    apply_custom_client_json(&data);
+}
+
+/// Applies a verified (or compiled-in) custom client payload to the global config.
+pub(crate) fn apply_custom_client_json(data: &[u8]) {
     let Ok(mut data) =
-        serde_json::from_slice::<std::collections::HashMap<String, serde_json::Value>>(&data)
+        serde_json::from_slice::<std::collections::HashMap<String, serde_json::Value>>(data)
     else {
         log::error!("Failed to parse custom client config");
         return;
