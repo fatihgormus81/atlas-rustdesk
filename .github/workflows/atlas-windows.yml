@@ -162,6 +162,15 @@ jobs:
           test -f "./rustdesk/$PACK_EXE" || { echo "missing $PACK_EXE"; exit 1; }
           test -f "./out/$PACK_EXE" || { echo "missing out/$PACK_EXE"; exit 1; }
 
+      - name: Verify executable metadata
+        shell: pwsh
+        run: |
+          $v = (Get-Item "./out/$env:PACK_EXE").VersionInfo
+          Write-Output "::notice::ProductName=$($v.ProductName) | CompanyName=$($v.CompanyName) | LegalCopyright=$($v.LegalCopyright) | FileDescription=$($v.FileDescription)"
+          if ($v.ProductName -ne 'Atlas') { throw "ProductName: $($v.ProductName)" }
+          if ($v.CompanyName -ne 'Atlantik Yazılım') { throw "CompanyName: $($v.CompanyName)" }
+          if ($v.LegalCopyright -notlike '*RustDesk tabanlıdır (AGPL-3.0)*') { throw "LegalCopyright: $($v.LegalCopyright)" }
+
       - name: Upload executable
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
