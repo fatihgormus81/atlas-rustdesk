@@ -104,17 +104,6 @@ mod tests {
         );
         assert_eq!(custom_client_source(None), CustomClientSource::File);
     }
-
-    #[test]
-    fn applying_destek_sets_app_name_and_hard_settings() {
-        // Only test that touches the global config statics.
-        crate::common::apply_custom_client_json(variant_json("destek").unwrap().as_bytes());
-        assert_eq!(
-            hbb_common::config::APP_NAME.read().unwrap().as_str(),
-            "Atlas Destek"
-        );
-        let hard = hbb_common::config::HARD_SETTINGS.read().unwrap();
-        assert_eq!(hard.get("conn-type").map(String::as_str), Some("incoming"));
-        assert_eq!(hard.get("disable-settings").map(String::as_str), Some("Y"));
-    }
+    // No test applies a payload to the global config here: tests share one process, and
+    // `conn-type=incoming` would leak into the client login tests running alongside.
 }
