@@ -130,7 +130,12 @@ jobs:
         shell: bash
         run: |
           FEATURES=$(python3 ./build.py --portable --flutter --skip-portable-pack --hwcodec --vram --print-features)
-          cargo test --locked --release --lib --features "$FEATURES"
+          set +e
+          cargo test --locked --release --lib --features "$FEATURES" 2>&1 | tee test.log
+          status=${PIPESTATUS[0]}
+          # Public annotations, since job logs need authentication to read.
+          grep -E "^test .* FAILED$|panicked at|^error(\[E[0-9]+\])?:|^  --> " test.log | head -40 | sed 's/^/::error::/'
+          exit $status
 
       - name: Find Runner.res
         continue-on-error: true
